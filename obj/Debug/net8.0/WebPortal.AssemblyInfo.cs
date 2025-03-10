@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebPortal")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5c4ebce4073d18b9cb48ca928b2fd27f4e66db36")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ee15abc76d3b4474bcbf644a072be161dd2db2d5")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebPortal")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebPortal")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
