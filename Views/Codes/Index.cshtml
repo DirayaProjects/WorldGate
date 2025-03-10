@@ -1,0 +1,206 @@
+﻿@model List<WebPortal.Models.Code>
+
+@{
+    ViewData["Title"] = "Codes";
+    var counter = 1;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/tables.css" asp-append-version="true" />
+}
+
+<section class="d-flex justify-content-between p-3">
+    <div class="d-flex">
+        <h4 class="pt-1">Codes Found:</h4>
+        <p id="topNb">
+            <strong>@Model.Count()</strong>
+        </p>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createCodeModal">
+            Create New Code
+        </button>
+    </div>
+</section>
+
+<div class="card">
+    <div class="card-body">
+        <table id="Table" class="table table-responsive text-center">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Description</th>
+                    <th>Kind</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@counter</td>
+                        <td>@item.Description</td>
+                        <td>
+                            @(item.Kind == 1 ? "Category" :
+                                item.Kind == 2 ? "Resolution" :
+                                item.Kind == 3 ? "Source" :
+                                item.Kind == 4 ? "Priority" : "Unknown")
+                        </td>
+                        <td>
+                            <a href="#" data-toggle="modal" data-target="#editCodeModal"
+                               data-id="@item.Id" data-description="@item.Description" data-kind="@item.Kind">
+                                <i class="bx bx-edit mt-1"></i>
+                            </a>
+                            <a asp-controller="codes" asp-action="delete" asp-route-id="@item.Id"
+                               onclick="confirmDelete('@Url.Action("Delete", "Codes", new { id = item.Id})'); return false;">
+                                <i class="bx bx-trash mt-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    counter++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Code Modal -->
+<div class="modal fade" id="createCodeModal" tabindex="-1" role="dialog" aria-labelledby="createCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCodeModalLabel">Create Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Codes" asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Description</label>
+                        <input type="text" id="Description" name="Description" class="form-control" required 
+                        placeholder="Enter Codes's Description"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Kind" class="form-label">Kind</label>
+                        <select id="Kind" name="Kind" class="form-control" required>
+                            <option value="1">Category</option>
+                            <option value="2">Resolution</option>
+                            <option value="3">Source</option>
+                            <option value="4">Priority</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Code Modal -->
+<div class="modal fade" id="editCodeModal" tabindex="-1" role="dialog" aria-labelledby="editCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCodeModalLabel">Edit Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editCodeForm" asp-controller="Codes" asp-action="Edit" method="post">
+                    <input type="hidden" id="EditId" name="Id" />
+
+                    <div class="mb-3">
+                        <label for="EditDescription" class="form-label">Description</label>
+                        <input type="text" id="EditDescription" name="Description" class="form-control" required 
+                        placeholder="Enter Codes's Description"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="EditKind" class="form-label">Kind</label>
+                        <select id="EditKind" name="Kind" class="form-control" required>
+                            <option value="1">Category</option>
+                            <option value="2">Resolution</option>
+                            <option value="3">Source</option>
+                            <option value="4">Priority</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            
+
+            $('#editCodeModal').on('show.bs.modal', function (e) {
+                var button = $(e.relatedTarget); 
+                var id = button.data('id');
+                var description = button.data('description');
+                var kind = button.data('kind');
+
+                $('#EditId').val(id);
+                $('#EditDescription').val(description);
+                $('#EditKind').val(kind);
+            });
+
+            $('#Table').DataTable({
+                "columnDefs": [
+                    { "orderable": false, "targets": [3] }
+                ],
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "pageLength": 5,
+                
+                "language": {
+                    "lengthMenu": "Display _MENU_",
+                    "zeroRecords": "No Codes Found",
+                    "info": "Page _PAGE_ of _PAGES_",
+                    "infoEmpty": "",
+                    "infoFiltered": "",
+                    "paginate": {
+                        "previous": "<",
+                        "next": ">",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                }
+            });
+
+            $('.dataTables_filter input').attr('placeholder', '🔎 Search');
+            $('.dataTables_filter label').contents().filter(function () {
+                return this.nodeType === 3;
+            }).remove();
+        
+        });
+
+        function confirmDelete(deleteUrl) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to return this code!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        }
+    </script>
+}

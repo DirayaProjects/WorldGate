@@ -1,0 +1,47 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+/*
+.main-header {
+    position: fixed !important;
+    top: 0;
+    width: calc(100% - 250px);
+    z-index: 1030;
+    transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+}*/
+
+/*.sidebar-mini.sidebar-collapse .main-header {
+    width: calc(100% - 74px);
+}*/
+
+.content-header {
+    padding: 5px !important
+}
+
+/*.sidebar-closed .main-header, .sidebar-mini.sidebar-open .main-header {
+    width: 100% !important;
+}*/
+
+/*.sidebar-mini.sidebar-collapse .nav-item span {
+    display: none
+}*/

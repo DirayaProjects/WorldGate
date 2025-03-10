@@ -1,0 +1,75 @@
+﻿@model WebPortal.Models.User
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 text-dark">User Details</h1>
+            <hr class="mb-4" />
+        </div>
+    </div>
+
+    @if (Model != null)
+    {
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="text-muted">Full Name</h5>
+                <p class="fs-5">@Model.FirstName @Model.LastName</p>
+            </div>
+            <div class="col-md-6">
+                <h5 class="text-muted">Username</h5>
+                <p class="fs-5">@Model.Username</p>
+            </div>
+        </div>
+
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="text-muted">Phone Number</h5>
+                <p class="fs-5">+961 @Model.PhoneNumber</p>
+            </div>
+            <div class="col-md-6">
+                <h5 class="text-muted">Active Status</h5>
+                <p class="fs-5 @((Model.IsActive == 1) ? "text-success" : "text-danger")">
+                    @((Model.IsActive == 1) ? "Activated" : "Deactivated")
+                </p>
+            </div>
+        </div>
+
+        @if (Model.IsActive == 1)
+        {
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="text-muted">Plan Name</h5>
+                    <p class="fs-5">@Model.UserPlan?.Plan?.PlanName</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-muted">Plan Duration</h5>
+                    <p class="fs-5">@Model.UserPlan?.Plan?.Duration Months</p>
+                </div>
+            </div>
+
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="text-muted">Start Date</h5>
+                    <p class="fs-5">@Model.UserPlan?.StartDate</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-muted">End Date</h5>
+                    <p class="fs-5">@Model.UserPlan?.EndDate</p>
+                </div>
+            </div>
+        }
+
+        <div class="row mb-4">
+            <a class="btn btn-secondary" asp-controller="users" asp-action="index">Back to List</a>
+        </div>
+
+    }
+
+</div>

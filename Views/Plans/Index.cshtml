@@ -1,0 +1,193 @@
+﻿@model List<WebPortal.Models.Plan>
+
+@{
+    ViewData["Title"] = "Plans";
+    var counter = 1;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/tables.css" asp-append-version="true" />
+}
+
+<section class="d-flex justify-content-between p-3">
+    <div class="d-flex">
+        <h4 class="pt-1">Plans Found:</h4>
+        <p id="topNb">
+            <strong>@Model.Count()</strong>
+        </p>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPlanModal">
+            Create New Plan
+        </button>
+    </div>
+</section>
+
+<div class="card">
+    <div class="card-body">
+        <table id="Table" class="table table-responsive text-center">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Duration</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@counter</td>
+                        <td>@item.PlanName</td>
+                        <td>@item.Duration Months</td>
+                        <td>
+                            <a href="#" data-toggle="modal" data-target="#editPlanModal"
+                               data-id="@item.Id" data-name="@item.PlanName" data-duration="@item.Duration">
+                                <i class="bx bx-edit mt-1"></i>
+                            </a>
+                            <a asp-controller="plans" asp-action="delete" asp-route-id="@item.Id"
+                               onclick="confirmDelete('@Url.Action("Delete", "Plans", new { id = item.Id})'); return false;">
+                                <i class="bx bx-trash mt-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    counter++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Plan Modal -->
+<div class="modal fade" id="createPlanModal" tabindex="-1" role="dialog" aria-labelledby="createPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createPlanModalLabel">Create Plan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Plans" asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label for="PlanName" class="form-label">Name</label>
+                        <input type="text" id="PlanName" name="PlanName" class="form-control" required 
+                        placeholder="Enter Plan's Name"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Duration" class="form-label">Duration</label>
+                        <input type="number" id="Duration" name="Duration" class="form-control" required 
+                        placeholder="Enter Plan's Duration (in Months)"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Plan Modal -->
+<div class="modal fade" id="editPlanModal" tabindex="-1" role="dialog" aria-labelledby="editPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPlanModalLabel">Edit Plan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editCodeForm" asp-controller="Plans" asp-action="Edit" method="post">
+                    <input type="hidden" id="EditId" name="Id" />
+
+                    <div class="mb-3">
+                        <label for="EditPlanName" class="form-label">Name</label>
+                        <input type="text" id="EditPlanName" name="PlanName" class="form-control" required
+                               placeholder="Enter Plan's Name" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="EditDuration" class="form-label">Duration</label>
+                        <input type="number" id="EditDuration" name="Duration" class="form-control" required
+                               placeholder="Enter Plan's Duration (in Months)" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+
+            $('#editPlanModal').on('show.bs.modal', function (e) {
+                var button = $(e.relatedTarget);
+                var id = button.data('id');
+                var name = button.data('name');
+                var duration = button.data('duration');
+
+                $('#EditId').val(id);
+                $('#EditPlanName').val(name);
+                $('#EditDuration').val(duration);
+            });
+
+            $('#Table').DataTable({
+                "columnDefs": [
+                    { "orderable": false, "targets": [3] }
+                ],
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "pageLength": 5,
+
+                "language": {
+                    "lengthMenu": "Display _MENU_",
+                    "zeroRecords": "No Plans Found",
+                    "info": "Page _PAGE_ of _PAGES_",
+                    "infoEmpty": "",
+                    "infoFiltered": "",
+                    "paginate": {
+                        "previous": "<",
+                        "next": ">",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                }
+            });
+
+            $('.dataTables_filter input').attr('placeholder', '🔎 Search');
+            $('.dataTables_filter label').contents().filter(function () {
+                return this.nodeType === 3;
+            }).remove();
+
+        });
+
+        function confirmDelete(deleteUrl) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to return this plan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        }
+    </script>
+}

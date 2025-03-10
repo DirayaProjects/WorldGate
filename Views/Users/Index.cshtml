@@ -1,0 +1,143 @@
+﻿@model List<WebPortal.Models.User>
+
+@{
+    ViewData["Title"] = "Users";
+    var counter = 1;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/tables.css" asp-append-version="true" />
+}
+
+
+<section class="d-flex justify-content-between p-3">
+    <div class="d-flex">
+        <h4 class="pt-1">Users Found:</h4>
+        <p id="topNb">
+            <strong>@Model.Count()</strong>
+        </p>
+    </div>
+    <div>
+        <a asp-controller="Users" asp-action="Create" class="btn btn-primary">
+            Create New User
+        </a>
+    </div>
+</section>
+
+<div class="card">
+    <div class="card-body">
+        
+        <table id="Table" class="table table-responsive text-center">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@counter</td>
+                        <td>@user.FirstName @user.LastName</td>
+                        <td>@user.Username</td>
+                        <td>+961 @user.PhoneNumber</td>
+                        
+                        <td>
+                                @if (user.IsActive == 1)
+                                {
+                                <span class="fs-5 text-success">
+                                     Activated (@user.UserPlan?.Plan?.PlanName)
+                                </span>
+                                }
+                                else
+                                {
+                                <span class="fs-5 text-danger">
+                                     Deactivated
+                                </span>
+                                }
+                        </td>
+                       
+                        <td>
+                            <a asp-controller="users" asp-action="details" asp-route-id="@user.Id"><i class='bx bx-info-circle mt-1'></i></a>
+
+                            <a asp-controller="users" asp-action="edit" asp-route-id="@user.Id"><i class='bx bx-edit mt-1'></i></a>
+                            
+                            <a asp-controller="users" asp-action="delete" asp-route-id="@user.Id"
+                               onclick="confirmDelete('@Url.Action("Delete", "Users", new { id = user.Id})'); return false;">
+                                <i class='bx bx-trash mt-1'></i>
+                            </a>
+                        </td>
+                    </tr>
+                    counter++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#Table').DataTable({
+                "columnDefs": [
+                    { "orderable": false, "targets": [5] }
+                ],
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "pageLength": 5,
+                
+                "language": {
+                    "lengthMenu": "Display _MENU_",
+                    "zeroRecords": "No Users Found",
+                    "info": "Page _PAGE_ of _PAGES_",
+                    "infoEmpty": "",
+                    "infoFiltered": "",
+                    "paginate": {
+                        "previous": "<",
+                        "next": ">",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                }
+            });
+
+            $('.dataTables_filter input').attr('placeholder', '🔎 Search');
+            $('.dataTables_filter label').contents().filter(function () {
+                return this.nodeType === 3;
+            }).remove();
+        });
+
+
+        function confirmDelete(deleteUrl) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to return this user!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                // cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        }
+    </script>
+}

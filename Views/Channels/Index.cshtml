@@ -1,0 +1,126 @@
+﻿@model List<WebPortal.Models.Channel>
+
+@{
+    ViewData["Title"] = "Channels";
+    var counter = 1;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/tables.css" asp-append-version="true" />
+}
+
+
+<section class="d-flex justify-content-between p-3">
+    <div class="d-flex">
+        <h4 class="pt-1">Channels Found:</h4>
+        <p id="topNb">
+            <strong>@Model.Count()</strong>
+        </p>
+    </div>
+    <div>
+        <a asp-controller="Channels" asp-action="Create" class="btn btn-primary">
+            Create New Channel
+        </a>
+    </div>
+</section>
+
+<div class="card">
+    <div class="card-body">
+
+        <table id="Table" class="table table-responsive text-center">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Icon</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var channel in Model)
+                {
+                    <tr>
+                        <td>@counter</td>
+                        <td><img src="@channel.Icon" alt="channel pic" style="width: 50px; height: 50px"/></td>
+                        <td>@channel.Name</td>
+                        <td>@channel.Category</td>
+
+                        <td>
+                            <a asp-controller="channels" asp-action="edit" asp-route-id="@channel.Id"><i class='bx bx-edit mt-1'></i></a>
+
+                            <a asp-controller="channels" asp-action="delete" asp-route-id="@channel.Id"
+                               onclick="confirmDelete('@Url.Action("Delete", "Channels", new { id = channel.Id})'); return false;">
+                                <i class='bx bx-trash mt-1'></i>
+                            </a>
+
+                        </td>
+                    </tr>
+                    counter++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#Table').DataTable({
+                "columnDefs": [
+                    { "orderable": false, "targets": [4] }
+                ],
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "pageLength": 5,
+
+                "language": {
+                    "lengthMenu": "Display _MENU_",
+                    "zeroRecords": "No Channels Found",
+                    "info": "Page _PAGE_ of _PAGES_",
+                    "infoEmpty": "",
+                    "infoFiltered": "",
+                    "paginate": {
+                        "previous": "<",
+                        "next": ">",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                }
+            });
+
+            $('.dataTables_filter input').attr('placeholder', '🔎 Search');
+            $('.dataTables_filter label').contents().filter(function () {
+                return this.nodeType === 3;
+            }).remove();
+        });
+
+
+        function confirmDelete(deleteUrl) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to return this channel!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                // cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,86 @@
+﻿<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+<li class="nav-item">
+    <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link">
+        <i class="fas fa-th-large"></i>
+            <span class="ml-3 brand-text">Dashboard</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a asp-area="" asp-controller="Channels" asp-action="Index" class="nav-link">
+        <i class="fas fa-tv"></i>
+        <span class="ml-3 brand-text">Channels</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a asp-area="" asp-controller="Users" asp-action="Index" class="nav-link">
+        <i class="fas fa-users"></i>
+            <span class="ml-3 brand-text">Users</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a asp-area="" asp-controller="Plans" asp-action="Index" class="nav-link">
+        <i class="fas fa-lightbulb ml-1"></i>
+            <span class="ml-3 brand-text">Plans</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a asp-area="" asp-controller="Codes" asp-action="Index" class="nav-link">
+        <i class="fas fa-barcode"></i>
+            <span class="ml-3 brand-text">Codes</span>
+    </a>
+</li>
+</ul>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.querySelector('.nav-sidebar');
+        const currentUrl = window.location.pathname;
+        let activeLinkFound = false;
+
+        sidebar.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('href') === currentUrl) {
+                link.classList.add('active');
+                activeLinkFound = true;
+
+                let parent = link.closest('.nav-item.has-treeview');
+                while (parent) {
+                    parent.classList.add('menu-open');
+                    parent.querySelector('.nav-link').classList.add('active');
+                    parent = parent.parentElement.closest('.nav-item.has-treeview');
+                }
+
+                localStorage.setItem('lastActiveLink', link.getAttribute('href'));
+            }
+        });
+
+        if (!activeLinkFound) {
+            const lastActiveLink = localStorage.getItem('lastActiveLink');
+            if (lastActiveLink) {
+                const lastLinkElement = sidebar.querySelector(`.nav-link[href="${lastActiveLink}"]`);
+                if (lastLinkElement) {
+                    lastLinkElement.classList.add('active');
+
+                    let parent = lastLinkElement.closest('.nav-item.has-treeview');
+                    while (parent) {
+                        parent.classList.add('menu-open');
+                        parent.querySelector('.nav-link').classList.add('active');
+                        parent = parent.parentElement.closest('.nav-item.has-treeview');
+                    }
+                }
+            }
+        }
+
+        sidebar.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function () {
+                localStorage.setItem('lastActiveLink', link.getAttribute('href'));
+            });
+        });
+
+    });
+</script>

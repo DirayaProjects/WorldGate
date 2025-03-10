@@ -1,0 +1,114 @@
+﻿@model WebPortal.ViewModels.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Add User";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/forms.css" asp-append-version="true" />
+}
+
+<div class="card">
+    <div class="card-body">
+        <h2>Add User</h2>
+
+        <form asp-controller="Users" asp-action="Create" method="post">
+
+            <div class="form-group mb-4">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" required
+                       placeholder="Enter First Name" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" required
+                       placeholder="Enter Last Name" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <!--
+            <div class="form-group mb-4">
+                <label for="PhoneNb" class="form-label">Phone Number</label>
+                <div class="input-group">
+                    <select id="CountryCode" name="CountryCode" class="form-select" style="max-width: 120px;">
+                        <option value=""></option>
+                    </select>
+                    <input id="PhoneNb" class="form-control" placeholder="Enter phone number" />
+                </div>
+                <span asp-validation-for="PhoneNumber" class="text-danger mt-1 d-block"></span>
+            </div>
+            <input type="hidden" asp-for="PhoneNumber">
+            -->
+
+
+            <div class="form-group mb-4">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input type="tel" asp-for="PhoneNumber" class="form-control" required 
+                        placeholder="Enter Phone Number"/>
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" required
+                       placeholder="Enter Username"/>
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="form-label"></label>
+                <input type="password" asp-for="Password" class="form-control" required
+                       placeholder="Enter Password"/>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <hr />
+
+            <div class="form-group">
+                <label for="Plans" class="form-label">Plans</label>
+                <select id="Plans" name="PlanId" class="form-control" required>
+                    @foreach (var plan in Model.Plans)
+                    {
+                        <option value="@plan.Id">@plan.PlanName</option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-primary me-3">Submit</button>
+                <a class="btn btn-secondary" asp-controller="Users" asp-action="Index">Back to List</a>
+            </div>
+                
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+
+            // $.getJSON("/api/coutryCodes.json", function (data) {
+            //     let countryDropdown = $("#CountryCode");
+            //     countryDropdown.empty();
+
+            //     $.each(data, function (index, country) {
+            //         if (country.idd && country.idd.root) {
+            //             let dialCode = country.idd.root + (country.idd.suffixes ? country.idd.suffixes[0] : "");
+            //             let option = `<option value="${dialCode}">${dialCode} (${country.name.common})</option>`;
+            //             countryDropdown.append(option);
+            //         }
+            //     });
+            // }).fail(function () {
+            //     $("#CountryCode").html("<option value=''>Error loading</option>");
+            // });
+
+            // $("#PhoneNb").on("input", function () {
+            //     let fullPhoneNumber = $("#CountryCode").val() + " " + $(this).val();
+            //     $("#PhoneNumber").val(fullPhoneNumber);
+            // });
+
+        });
+    </script>
+}

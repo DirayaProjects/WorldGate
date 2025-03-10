@@ -1,0 +1,320 @@
+﻿@model WebPortal.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+	var userPlanCounts = Model.Plans
+			.Select(p => new
+			{
+				PlanName = p.PlanName,
+				Count = Model.Users.Count(u => u.UserPlan?.Plan?.PlanName == p.PlanName)
+			})
+			.ToList();
+
+	var usersGrowth = Model.Users
+	.GroupBy(u => new { u.CreatedAt.Year, u.CreatedAt.Month })
+	.Select(g => new
+	{
+		Date = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("yyyy-MM"),
+		Count = g.Count(u => u.IsActive == 1)
+	})
+	.OrderBy(g => g.Date)
+	.ToList();
+}
+
+@section styles{
+	<link rel="stylesheet" href="~/css/dashboard.css"/>
+}
+
+<h2>Admin Dashboard</h2>
+
+<section class="content">
+	<div class="container-fluid">
+		<!-- First Row -->
+		<div class="row">
+			<div class="col-lg-3 col-6">
+				<div class="small-box">
+					<div class="inner">
+						<h3>@Model.Channels.Count</h3>
+						<p>Total Channels</p>
+					</div>
+					<div class="icon">
+						<i class="fas fa-tv"></i>
+					</div>
+					<a asp-controller="Channels" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right ml-1"></i></a>
+				</div>
+			</div>
+			<div class="col-lg-3 col-6">
+				<div class="small-box">
+					<div class="inner">
+						<h3>@Model.Users.Count</h3>
+						<p>Total Users</p>
+					</div>
+					<div class="icon">
+						<i class="fas fa-users"></i>
+					</div>
+					<a asp-controller="Users" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right ml-1"></i></a>
+				</div>
+			</div>
+			<div class="col-lg-3 col-6">
+				<div class="small-box">
+					<div class="inner">
+						<h3>@Model.Plans.Count</h3>
+						<p>Total Plans</p>
+					</div>
+					<div class="icon">
+						<i class="fas fa-lightbulb"></i>
+					</div>
+					<a asp-controller="Plans" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right ml-1"></i></a>
+				</div>
+			</div>
+			<div class="col-lg-3 col-6">
+				<div class="small-box">
+					<div class="inner">
+						<h3>@Model.Codes.Count</h3>
+						<p>Total Codes</p>
+					</div>
+					<div class="icon">
+						<i class="fas fa-barcode"></i>
+					</div>
+					<a asp-controller="Codes" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right ml-1"></i></a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<hr/>
+
+	<!-- Charts Section -->
+	<div class="row">
+
+		<!-- Line Graph: Users Growth Over Time -->
+		<div class="col-lg-12 col-sm-12">
+			<div class="card shadow-sm p-0">
+				<div class="card-body p-0">
+					<h5 class="card-title p-3 m-0">Users Growth Over Time</h5>
+					<canvas id="usersGrowth"></canvas>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- Doughnut Chart: Active vs. Inactive Users -->
+		<div class="col-lg-6 col-sm-12">
+			<div class="card shadow-sm p-0" ">
+				<div class="card-body p-0">
+					<h5 class="card-title p-3 m-0">Users Status</h5>
+					<div class="chart-wrapper">
+						<canvas id="usersStatus"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- Bar Chart: Users Per Plan -->
+		<div class="col-lg-6 col-sm-12">
+			<div class="card shadow-sm p-0">
+				<div class="card-body p-0">
+					<h5 class="card-title p-3 m-0">Users per Plan</h5>
+					<canvas id="usersPerPlan"></canvas>
+				</div>
+			</div>
+		</div>
+		
+
+		<!-- Bar Chart: Codes -->
+		<div class="col-lg-6 col-sm-12">
+			<div class="card shadow-sm p-0">
+				<div id="codesCard" class="card-body p-0">
+					<h5 class="card-title p-3 m-0">Codes</h5>
+					<canvas id="codes"></canvas>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- Pie Chart: Channels by Category -->
+		<div class="col-lg-6 col-sm-12">
+			<div class="card shadow-sm p-0">
+				<div class="card-body p-0">
+					<h5 class="card-title p-3 m-0">Channels by Category</h5>
+					<canvas id="channelsByCategory"></canvas>
+				</div>
+			</div>
+		</div>
+
+		
+
+	</div>
+</section>
+
+
+@section Scripts{
+	<script>
+		//Active vs. Inactive Users
+		const activeUsers = @Model.Users.Count(u => u.IsActive == 1);
+		const inactiveUsers = @Model.Users.Count(u => u.IsActive == 0);
+		new Chart(document.getElementById('usersStatus'), {
+			type: 'doughnut',
+			data: {
+				labels: ['Active Users', 'Inactive Users'],
+				datasets: [{
+					data: [activeUsers, inactiveUsers],
+					// backgroundColor: ['#4CAF50', '#F44336']
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+			}
+		});
+
+		// Data for Bar Chart: Codes
+		new Chart(document.getElementById('codes'), {
+			type: 'bar',
+			data: {
+				labels: ['Categories', 'Resolutions', 'Sources', 'Priorities'],
+				datasets: [{
+					// label: 'Count',
+					data: [
+						@Model.Codes.Count(c => c.Kind == 1),
+						@Model.Codes.Count(c => c.Kind == 2),
+						@Model.Codes.Count(c => c.Kind == 3),
+						@Model.Codes.Count(c => c.Kind == 4),
+					],
+					// backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545']
+					backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff']
+				}]
+			},
+			options: {
+				plugins: {
+					legend: {
+						display: false
+					}
+				},
+				responsive: true,
+				maintainAspectRatio: false,
+				scales: {
+					y: {
+						beginAtZero: true,
+						title: {
+							display: true,
+							text: 'Count of Codes'
+						}
+					},
+					x: {
+						title: {
+							display: true,
+							text: 'Type of Codes'
+						}
+					}
+				}
+			}
+		});
+
+
+		// Pie Chart: Channels by Category
+		const categoryLabels = @Html.Raw(Json.Serialize(Model.Channels.Select(c => c.Category).Distinct()));
+		const categoryCounts = @Html.Raw(Json.Serialize(Model.Channels.GroupBy(c => c.Category).Select(g => g.Count())));
+
+		new Chart(document.getElementById('channelsByCategory'), {
+			type: 'pie',
+			data: {
+				labels: categoryLabels,
+				datasets: [{
+					data: categoryCounts,
+					// backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff']
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+			}
+		});
+
+
+		// Bar Chart: Users per Plan
+		const planLabels = @Html.Raw(Json.Serialize(userPlanCounts.Select(p => p.PlanName)));
+		const userCounts = @Html.Raw(Json.Serialize(userPlanCounts.Select(p => p.Count)));
+
+		new Chart(document.getElementById('usersPerPlan'), {
+			type: 'bar',
+			data: {
+				labels: planLabels,
+				datasets: [{
+					data: userCounts,
+					backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff'],
+				}]
+			},
+			options: {
+				plugins: {
+					legend: {
+						display: false
+					}
+				},
+				responsive: true,
+				maintainAspectRatio: false,
+				scales: {
+					y: {
+						beginAtZero: true,
+						title: {
+							display: true,
+							text: 'Number of Users'
+						}
+					},
+					x: {
+						title: {
+							display: true,
+							text: 'Subscription Plans'
+						}
+					}
+				}
+			}
+		});
+
+
+		// Line Graph: Users Growth Over Time
+		const growthLabels = @Html.Raw(Json.Serialize(usersGrowth.Select(g => g.Date)));
+		const growthCounts = @Html.Raw(Json.Serialize(usersGrowth.Select(g => g.Count)));
+
+		new Chart(document.getElementById('usersGrowth'), {
+			type: 'line',
+			data: {
+				labels: growthLabels,
+				datasets: [{
+					label: 'Active Users',
+					data: growthCounts,
+					// borderColor: '#007bff',
+					// backgroundColor: 'rgba(0, 123, 255, 0.2)',
+					fill: true,
+					tension: 0.3
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				scales: {
+					y: {
+						beginAtZero: true,
+						title: {
+							display: true,
+							text: 'Number of Active Users'
+						}
+					},
+					x: {
+						ticks: {
+							autoSkip: true,
+							maxTicksLimit: 10 
+						},
+						title: {
+							display: true,
+							text: 'Month'
+						}
+					}
+				}
+			}
+		});
+
+
+	</script>
+}

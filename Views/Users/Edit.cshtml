@@ -1,0 +1,101 @@
+﻿@model WebPortal.ViewModels.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/forms.css" asp-append-version="true" />
+}
+
+<div class="card">
+    <div class="card-body">
+        <h2>Edit User</h2>
+
+        <form asp-action="Edit" method="post" id="editUserForm">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group mb-4">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" required
+                       placeholder="Enter First Name" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" required
+                       placeholder="Enter Last Name" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input type="tel" asp-for="PhoneNumber" class="form-control" required
+                       placeholder="Enter Phone Number" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" required
+                       placeholder="Enter Username" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <hr/>
+
+            <div class="form-group mb-4">
+                <label asp-for="NewPassword" class="form-label">New Password</label>
+                <input type="password" asp-for="NewPassword" class="form-control"
+                       placeholder="Enter New Password"/>
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" asp-for="ConfirmPassword" class="form-control"
+                       placeholder="Confirm New Password"/>
+                <span id="confirmPasswordError" asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <hr/>
+
+            <div class="form-group">
+                <label asp-for="PlanId" class="form-label">Plans</label>
+                <select asp-for="PlanId" class="form-control">
+                    <option value="">No Plan</option>
+                    @foreach (var plan in Model.Plans)
+                    {
+                        <option value="@plan.Id">@plan.PlanName</option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-primary me-3">Submit</button>
+                <a class="btn btn-secondary" asp-controller="Users" asp-action="Index">Back to List</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $("form").on("submit", function (e) {
+                var newPassword = $("#NewPassword").val();
+                var confirmPassword = $("#ConfirmPassword").val();
+                var errorSpan = $("#confirmPasswordError");
+
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    errorSpan.text("Passwords do not match!");
+                } else {
+                    errorSpan.text(""); 
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,311 @@
+﻿@model WebPortal.ViewModels.ChannelViewModel
+
+@{
+    ViewData["Title"] = "Edit Channel";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/css/channel.css" />
+}
+
+
+<form asp-controller="Channels" asp-action="Edit" method="post" enctype="multipart/form-data" class="form-container">
+    <input type="hidden" asp-for="Id" />
+
+    <h2 class="title">Edit Channel</h2>
+    <div class="form-group">
+        <label asp-for="Name" class="form-label">Channel Name</label>
+        <input asp-for="Name" id="Name" class="form-control" required 
+            placeholder="Enter Channel's Name"/>
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Category" class="form-label">Category</label>
+        <select asp-for="Category" id="Category" class="form-control" required>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Description">@category.Description</option>
+            }
+        </select>
+        <span asp-validation-for="Category" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Icon" class="form-label"></label>
+        <div class="custom-file-container">
+            <input asp-for="Icon" class="form-control-file" id="Icon" hidden />
+            <label for="Icon" class="custom-file-btn">Choose Image</label>
+            <span id="fileName" class="file-name">No image chosen</span>
+        </div>
+        <span asp-validation-for="Icon" class="text-danger"></span>
+    </div>
+
+
+    <h4 class="mt-4">Links</h4>
+    <div id="linksContainer" class="mb-3">
+        @for (var i = 0; i < Model.Links.Count; i++)
+        {
+            <div class="input-group mb-3 link-input-group">
+                <div class="d-flex w-100">
+                    <input type="text" asp-for="Links[i].Url" class="form-control me-2" placeholder="Link URL" required>
+
+                    <select asp-for="Links[i].Resolution" class="form-control me-2" required>
+                        <option value="">Resolution</option>
+                        @foreach (var resolution in Model.Resolutions)
+                        {
+                            <option value="@resolution.Description">@resolution.Description</option>
+                        }
+                    </select>
+                    <select asp-for="Links[i].Priority" class="form-control me-2" required>
+                        <option value="">Priority</option>
+                        @foreach (var priority in Model.Priorities)
+                        {
+                            <option value="@priority.Description">@priority.Description</option>
+                        }
+                    </select>
+                    <select asp-for="Links[i].Source" class="form-control me-2" required>
+                        <option value="">Source</option>
+                        @foreach (var source in Model.Sources)
+                        {
+                            <option value="@source.Description">@source.Description</option>
+                        }
+                    </select>
+                    <input type="text" asp-for="Links[i].Bandwidth" class="form-control me-2" placeholder="Bandwidth" required>
+                    <button type="button" class="btn btn-danger ms-2 removeLink">Remove</button>
+                </div>
+            </div>
+        }
+
+    </div>
+
+
+    <div class="d-flex mt-4 justify-content-between">
+        <div>
+            <button type="button" class="btn btn-outline-primary mb-4" id="addLink">+ Add Link</button>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary me-3">Submit</button>
+            <a class="btn btn-secondary" asp-controller="Channels" asp-action="Index">Back to List</a>
+        </div>
+
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var container = document.getElementById('linksContainer');
+            var removeButtons = container.querySelectorAll('.removeLink');
+
+            removeButtons.forEach((btn, index) => {
+                btn.disabled = index !== removeButtons.length - 1; 
+            });
+        });
+
+        document.getElementById('addLink').addEventListener('click', function () {
+            var container = document.getElementById('linksContainer');
+            var lastInputGroup = container.lastElementChild;
+
+            if (lastInputGroup) {
+                var inputs = lastInputGroup.querySelectorAll('input, select');
+                for (var i = 0; i < inputs.length; i++) {
+                    if (!inputs[i].value.trim()) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Incomplete Fields',
+                            text: 'Please fill in all fields before adding a new link.',
+                            confirmButtonColor: '#0066cc'
+                        });
+                        return;
+                    }
+                }
+            }
+
+            var removeButtons = container.querySelectorAll('.removeLink');
+            removeButtons.forEach(btn => btn.disabled = true);
+
+            var index = container.children.length;
+            var newInputGroup = document.createElement('div');
+            newInputGroup.classList.add('input-group', 'mb-3', 'link-input-group');
+
+            newInputGroup.innerHTML = `
+                <div class="d-flex w-100">
+                    <input type="text" name="Links[${index}].Url" class="form-control me-2" placeholder="Link URL" required>
+                    <select name="Links[${index}].Resolution" class="form-control me-2" required>
+                        <option value="">Resolution</option>
+        @foreach (var resolution in Model.Resolutions)
+        {
+                                <option value="@resolution.Description">@resolution.Description</option>
+        }
+                    </select>
+                    <select name="Links[${index}].Priority" class="form-control me-2" required>
+                        <option value="">Priority</option>
+        @foreach (var priority in Model.Priorities)
+        {
+                                <option value="@priority.Description">@priority.Description</option>
+        }
+                    </select>
+                    <select name="Links[${index}].Source" class="form-control me-2" required>
+                        <option value="">Source</option>
+        @foreach (var source in Model.Sources)
+        {
+                                <option value="@source.Description">@source.Description</option>
+        }
+                    </select>
+                    <input type="text" name="Links[${index}].Bandwidth" class="form-control me-2" placeholder="Bandwidth" required>
+                    <button type="button" class="btn btn-danger ms-2 removeLink">Remove</button>
+                </div>
+            `;
+
+            container.appendChild(newInputGroup);
+
+           
+            var updatedRemoveButtons = container.querySelectorAll('.removeLink');
+            updatedRemoveButtons.forEach(btn => btn.disabled = true);
+            updatedRemoveButtons[updatedRemoveButtons.length - 1].disabled = false;
+        });
+
+        document.getElementById('linksContainer').addEventListener('click', function (event) {
+            if (event.target.classList.contains('removeLink')) {
+                event.target.closest('.link-input-group').remove();
+
+                var container = document.getElementById('linksContainer');
+                var removeButtons = container.querySelectorAll('.removeLink');
+                removeButtons.forEach(btn => btn.disabled = true); 
+                if (removeButtons.length > 0) {
+                    removeButtons[removeButtons.length - 1].disabled = false;
+                }
+            }
+        });
+
+        document.getElementById("Icon").addEventListener("change", function () {
+            let fileName = this.files.length > 0 ? this.files[0].name : "No file chosen";
+            document.getElementById("fileName").textContent = fileName;
+        });
+
+             document.addEventListener('DOMContentLoaded', function () {
+                        document.querySelector('form').addEventListener('submit', function (event) {
+                            if (hasDuplicatePriorities()) {
+                                event.preventDefault();
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Duplicate Priority',
+                                    text: 'Multiple links cannot have the same priority.',
+                                    confirmButtonColor: '#d33'
+                                });
+                            }
+                        });
+                    });
+
+                    function hasDuplicatePriorities() {
+                        let priorities = [];
+                        let prioritySelects = document.querySelectorAll('select[name^="Links"][name$=".Priority"]');
+
+                        for (let select of prioritySelects) {
+                            let value = select.value;
+                            if (value && priorities.includes(value)) {
+                                return true;
+                            }
+                            priorities.push(value);
+                        }
+                        return false;
+                    }
+
+    </script>
+}
+
+<style>
+    .d-flex{
+        gap: 5px;
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group {
+        gap: 10px;
+    }
+
+    #addLink {
+        font-size: 16px;
+        padding: 10px 20px;
+        transition: background-color 0.3s ease;
+    }
+
+        #addLink:hover {
+            background-color: #0066cc;
+            color: white;
+        }
+
+    .removeLink {
+        font-size: 14px;
+        padding: 6px 12px;
+        margin-left: 10px;
+    }
+
+    button {
+        font-size: 16px;
+        padding: 10px 20px;
+        transition: background-color 0.3s ease;
+    }
+
+        button:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-outline-primary {
+        border-color: #0066cc;
+        color: #0066cc;
+    }
+
+    .custom-file-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-file-btn {
+        background-color: #007bff;
+        color: #fff;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 400 !important;
+        border: none;
+        display: inline-block;
+        transition: background 0.3s ease;
+    }
+
+        .custom-file-btn:hover {
+            background-color: #0056b3;
+        }
+
+    .file-name {
+        font-size: 14px;
+        color: #555;
+    }
+
+</style>
